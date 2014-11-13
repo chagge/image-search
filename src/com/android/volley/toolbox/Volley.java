@@ -29,6 +29,8 @@ public class Volley {
     /** Default on-disk cache directory. */
     private static final String DEFAULT_CACHE_DIR = "volley";
 
+    private static RequestQueue defaultQueue;
+
     /**
      * Creates a default instance of the worker pool and calls {@link RequestQueue#start()} on it.
      *
@@ -63,5 +65,12 @@ public class Volley {
      */
     public static RequestQueue newRequestQueue(Context context) {
         return newRequestQueue(context, null);
+    }
+
+    public synchronized static RequestQueue getSingletonRequestQueue(Context context) {
+        if(defaultQueue == null) {
+            defaultQueue = newRequestQueue(context,null);
+        }
+        return defaultQueue;
     }
 }
