@@ -8,19 +8,24 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.rmtheis.imagesearch.MainActivity" >
 
-    <EditText
+    <org.droidparts.widget.ClearableEditText
         android:id="@+id/editText1"
+        style="@style/AppTheme"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentStart="true"
-        android:ems="10"
+        android:drawableRight="@drawable/ic_clear_black_24dp"
+        android:drawablePadding="6dp"
         android:hint="@string/search_hint"
+        android:imeOptions="actionDone"
         android:inputType="text"
+        android:ems="10"
         android:maxLength="1500" >
 
-        <requestFocus />
-    </EditText>
+        <requestFocus>
+        </requestFocus>
+    </org.droidparts.widget.ClearableEditText>
 
     <GridView
         android:id="@+id/grid_view"

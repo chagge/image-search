@@ -11,6 +11,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -85,6 +86,12 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
                 // Intentionally left blank
             }
         });
+
+        searchField.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Empty click listener, placed here so we get a button click sound.
+            }});
 
         gridView = (GridView) findViewById(R.id.grid_view);
         gridView.setOnScrollListener(new ScrollListener(this));
