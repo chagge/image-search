@@ -37,7 +37,7 @@ public class GridViewAdapter extends BaseAdapter {
             view = new SquareImageView(context);
             view.setScaleType(CENTER_CROP);
         }
-        
+
         // Use the thumbnail link URL to populate the image view.
         GoogleSearchResult searchResult = getItem(position);
         String url = searchResult.getThumbnailLink();

@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -19,7 +18,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -37,9 +35,6 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
 
     /** Google Custom Search API credentials */
     private static final String API_KEY = "AIzaSyDIqfOxbfY6TV8-1-JWmKpx8QU9iyQTlPM";
-    
-    // Alternate credentials, tied to package name and developer certificate fingerprint. Usable when app signed with release key.  
-    //private static final String API_KEY = "AIzaSyCk03iAcPPhb8ind-wFXgTDST6aoDyu2ak";
 
     public static final String CUSTOM_SEARCH_ENGINE_ID = "001795296313896293509:ik1awfcdefo";
 
@@ -64,6 +59,7 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
     /** The page number to request, so we can request a starting index for search results */
     private int page = 0;
 
+    private EditText searchField;
     private GridView gridView;
     private GridViewAdapter adapter;
     private ArrayList<GoogleSearchResult> searchResults = new ArrayList<GoogleSearchResult>();
@@ -74,7 +70,7 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
 
-        EditText searchField = (EditText) findViewById(R.id.editText1);
+        searchField = (EditText) findViewById(R.id.editText1);
 
         searchField.addTextChangedListener(new TextWatcher() {
             @Override
@@ -84,7 +80,7 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-                textChanged(charSequence.toString());
+                textChanged(charSequence.toString().trim());
             }
 
             @Override
@@ -103,16 +99,17 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
         gridView.setOnScrollListener(new ScrollListener(this));
         adapter = new GridViewAdapter(this, searchResults, this);
         gridView.setAdapter(adapter);
-        
+
         gridView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(TAG, "Item clicked at position=" + position);
+                
                 // Launch the ImageDetailActivity with the search result that was clicked
                 Intent intent = new Intent(getBaseContext(), ImageDetailActivity.class);
                 intent.putExtra(ImageDetailActivity.SEARCH_RESULT_EXTRA, adapter.getItem(position));
                 startActivity(intent);
+                
             }});
     }
 
@@ -137,6 +134,7 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
             searchTask = new SearchTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, searchString);
         } else {
             searchResults.clear();
+            adapter.notifyDataSetChanged();
         }        
     }
 
@@ -214,14 +212,14 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
     @Override
     public void onResponse(GoogleSearchResponseData response) {
         setProgressBarIndeterminateVisibility(false);
-
-        if (response != null) {
-            ArrayList<GoogleSearchResult> newResults = new ArrayList<GoogleSearchResult>(Arrays.asList(response.getSearchResults()));
-            searchResults.addAll(newResults);
-            adapter.notifyDataSetChanged();
-        } else {
+        if (response == null) {
             Log.e(TAG, "Null response in onResponse");
+            return;
         }
+
+        ArrayList<GoogleSearchResult> newResults = new ArrayList<GoogleSearchResult>(Arrays.asList(response.getSearchResults()));
+        searchResults.addAll(newResults);
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -231,9 +229,7 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
         if (error != null && error.getMessage() != null) {
             errorText = errorText + ". error=" + error.getMessage();
         }
-        Toast toast = Toast.makeText(this, errorText, Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.TOP, 0, 150);
-        toast.show();
+        Log.e(TAG, String.valueOf(errorText));
     }
 
 }

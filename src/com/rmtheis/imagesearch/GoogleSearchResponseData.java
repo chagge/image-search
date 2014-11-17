@@ -6,8 +6,6 @@ import com.google.gson.annotations.SerializedName;
 
 /** Represents a response to a Google image search */
 public class GoogleSearchResponseData implements Serializable {
-
-    // TODO Remove the fields we're not using
     
     /** Array of search results contained in a response to a Google image search request */
     @SerializedName("items")

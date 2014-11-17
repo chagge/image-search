@@ -31,19 +31,17 @@ public class ImageDetailActivity extends Activity {
         setContentView(R.layout.activity_detail);
         setTitle(R.string.image_detail);
         setProgressBarIndeterminateVisibility(true);
-        //        getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE, ActionBar.DISPLAY_SHOW_HOME);
 
         mImageViewTouch = (ImageViewTouch) findViewById(R.id.image);
-        mImageViewTouch.setDisplayType(DisplayType.FIT_IF_BIGGER);
+        mImageViewTouch.setDisplayType(DisplayType.FIT_TO_SCREEN);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            searchResult = (GoogleSearchResult) extras.getSerializable(SEARCH_RESULT_EXTRA);
+            searchResult = (GoogleSearchResult) extras
+                    .getSerializable(SEARCH_RESULT_EXTRA);
         } else {
             return;
         }
-
-        Log.d(TAG, "Got search result. link=" + searchResult.getLink());
 
         mTarget = new Target() {
             @Override
@@ -56,7 +54,8 @@ public class ImageDetailActivity extends Activity {
             @Override
             public void onBitmapFailed(Drawable arg0) {
                 setProgressBarIndeterminateVisibility(false);
-                Toast.makeText(getBaseContext(), "Unable to view image", Toast.LENGTH_LONG).show();
+                Toast.makeText(getBaseContext(), "Unable to view image",
+                        Toast.LENGTH_LONG).show();
                 Log.e(TAG, "onBitmapFailed()");
             }
 
@@ -67,7 +66,8 @@ public class ImageDetailActivity extends Activity {
 
         };
 
-        Picasso.with(this).load(searchResult.getLink())
+        Picasso.with(this) //
+        .load(searchResult.getLink()) //
         .into(mTarget);
     }
 
