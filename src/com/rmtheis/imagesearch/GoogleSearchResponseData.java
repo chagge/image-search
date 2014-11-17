@@ -1,9 +1,11 @@
 package com.rmtheis.imagesearch;
 
+import java.io.Serializable;
+
 import com.google.gson.annotations.SerializedName;
 
 /** Represents a response to a Google image search */
-public class GoogleSearchResponseData {
+public class GoogleSearchResponseData implements Serializable {
 
     // TODO Remove the fields we're not using
     
@@ -22,7 +24,7 @@ public class GoogleSearchResponseData {
         return searchResults;
     }
 
-    public static class Queries {
+    public static class Queries implements Serializable {
         @SerializedName("nextPage")
         private NextPage[] nextPage;
         
@@ -31,7 +33,7 @@ public class GoogleSearchResponseData {
         }
     }
     
-    public static class NextPage {
+    public static class NextPage implements Serializable {
         @SerializedName("title")
         private String title;
         
@@ -54,7 +56,7 @@ public class GoogleSearchResponseData {
         }
     }
     
-    public static class ImageData {
+    public static class ImageData implements Serializable {
         @SerializedName("thumbnailLink")
         private String thumbnailLink;
         
@@ -64,7 +66,7 @@ public class GoogleSearchResponseData {
     }
     
     /** Represents a single search result for an image search. */
-    public static class GoogleSearchResult {
+    public static class GoogleSearchResult implements Serializable {
 
         /** A name for this search result */
         @SerializedName("title")

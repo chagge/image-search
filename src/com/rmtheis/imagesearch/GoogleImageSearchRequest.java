@@ -16,10 +16,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.google.gson.Gson;
 
-public class ImageSearchRequest extends CustomRequest<GoogleSearchResponseData> {
+public class GoogleImageSearchRequest extends CustomRequest<GoogleSearchResponseData> {
 
-    private static final String TAG = ImageSearchRequest.class.getSimpleName();
+    private static final String TAG = GoogleImageSearchRequest.class.getSimpleName();
 
+    // For request parameters details see:
     // https://developers.google.com/custom-search/docs/xml_results#wsRequestParameters
     private static final String URL = "https://www.googleapis.com/customsearch/v1?";
     private static final String PARAM_KEY = "&key=",
@@ -37,7 +38,7 @@ public class ImageSearchRequest extends CustomRequest<GoogleSearchResponseData> 
 
     private Listener<GoogleSearchResponseData> listener;
 
-    public ImageSearchRequest(String apiKey, String searchTerm, int startingIndex, int numResults, Listener<GoogleSearchResponseData> listener, ErrorListener errorListener) throws UnsupportedEncodingException {
+    public GoogleImageSearchRequest(String apiKey, String searchTerm, int startingIndex, int numResults, Listener<GoogleSearchResponseData> listener, ErrorListener errorListener) throws UnsupportedEncodingException {
         super(Method.GET, URL
                 + PARAM_KEY + apiKey
                 + PARAM_CSE_ID + Uri.encode(MainActivity.CUSTOM_SEARCH_ENGINE_ID)

@@ -5,14 +5,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.Toast;
@@ -31,9 +35,11 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    /** Google Custom Search API credentials, tied to the package name and developer certificate fingerprint */
+    /** Google Custom Search API credentials */
     private static final String API_KEY = "AIzaSyDIqfOxbfY6TV8-1-JWmKpx8QU9iyQTlPM";
-    //private static final String API_KEY = "AIzaSyCk03iAcPPhb8ind-wFXgTDST6aoDyu2ak";// When signed with release key
+    
+    // Alternate credentials, tied to package name and developer certificate fingerprint. Usable when app signed with release key.  
+    //private static final String API_KEY = "AIzaSyCk03iAcPPhb8ind-wFXgTDST6aoDyu2ak";
 
     public static final String CUSTOM_SEARCH_ENGINE_ID = "001795296313896293509:ik1awfcdefo";
 
@@ -97,6 +103,17 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
         gridView.setOnScrollListener(new ScrollListener(this));
         adapter = new GridViewAdapter(this, searchResults, this);
         gridView.setAdapter(adapter);
+        
+        gridView.setOnItemClickListener(new OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(TAG, "Item clicked at position=" + position);
+                // Launch the ImageDetailActivity with the search result that was clicked
+                Intent intent = new Intent(getBaseContext(), ImageDetailActivity.class);
+                intent.putExtra(ImageDetailActivity.SEARCH_RESULT_EXTRA, adapter.getItem(position));
+                startActivity(intent);
+            }});
     }
 
     @Override
@@ -116,13 +133,10 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
         }
 
         if (searchString != null && searchString.length() >= MINIMUM_SEARCH_STRING_LENGTH) {
-
             // Enqueue another search to be sent after a delay
             searchTask = new SearchTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, searchString);
-
         } else {
             searchResults.clear();
-            // TODO Set empty view text?
         }        
     }
 
@@ -150,12 +164,13 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
                 return null;
             }
 
-            // We made it here without being interrupted, so fire off the search request
+            // We made it here without being interrupted, so return keyword to start request
             return searchString[0];
         }
 
         @Override
         protected void onPostExecute(String result) {
+            // Send the search request on the main thread
             if (result != null) {
                 sendSearchRequest(result);
             }
@@ -181,7 +196,7 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
         int startIndex = page * PAGE_SIZE + 1;
 
         try { 
-            ImageSearchRequest request = new ImageSearchRequest(API_KEY, searchString, startIndex, PAGE_SIZE, this, this);
+            GoogleImageSearchRequest request = new GoogleImageSearchRequest(API_KEY, searchString, startIndex, PAGE_SIZE, this, this);
             request.setShouldCache(SHOULD_CACHE);
             requestQueue = Volley.getSingletonRequestQueue(this);
             requestQueue.add(request);
@@ -216,7 +231,9 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
         if (error != null && error.getMessage() != null) {
             errorText = errorText + ". error=" + error.getMessage();
         }
-        Toast.makeText(this, errorText, Toast.LENGTH_SHORT).show();
+        Toast toast = Toast.makeText(this, errorText, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.TOP, 0, 150);
+        toast.show();
     }
 
 }

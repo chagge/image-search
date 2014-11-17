@@ -3,5 +3,6 @@
 
     <string name="app_name">Image Search</string>
     <string name="search_hint">Search</string>
+    <string name="image_detail">Image Detail</string>
 
 </resources>
