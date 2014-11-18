@@ -20,7 +20,6 @@ import android.widget.EditText;
 import android.widget.GridView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.RequestQueue.RequestFilter;
 import com.android.volley.Response;
 import com.android.volley.Response.Listener;
@@ -36,6 +35,7 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
     /** Google Custom Search API credentials */
     private static final String API_KEY = "AIzaSyDIqfOxbfY6TV8-1-JWmKpx8QU9iyQTlPM";
 
+    /** Google Custom Search API project identifier */
     public static final String CUSTOM_SEARCH_ENGINE_ID = "001795296313896293509:ik1awfcdefo";
 
     /** Minimum number of characters needed in the search string before a request is sent */
@@ -44,14 +44,13 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
     /** The number of results to request for a single image search request */
     private static final int PAGE_SIZE = 10;
 
-    /** Delay to wait after search text changes before the search request is sent */
+    /** Time delay after search text changes before the search request is sent */
     private static final int SEARCH_DELAY_MS = 900;
 
     /** Whether to cache responses to image search requests */
     private static final boolean SHOULD_CACHE = true;
 
     private AsyncTask<?,?,?> searchTask;
-    private RequestQueue requestQueue;
 
     /** The previously-searched search term */
     private String lastSearchString;
@@ -104,22 +103,32 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                
+
                 // Launch the ImageDetailActivity with the search result that was clicked
                 Intent intent = new Intent(getBaseContext(), ImageDetailActivity.class);
                 intent.putExtra(ImageDetailActivity.SEARCH_RESULT_EXTRA, adapter.getItem(position));
                 startActivity(intent);
-                
+
             }});
     }
 
     @Override
-    public void onResume(){
-        super.onResume();
+    public void onStop() {
+        super.onStop();
 
-        if (requestQueue == null) {
-            requestQueue = Volley.getSingletonRequestQueue(this);
-        }
+        // Avoid receiving callbacks when the app is no longer around.
+        removeAllRequests();
+    }
+
+    /** Cancel all requests in the RequestQueue */
+    public void removeAllRequests() {
+        Volley.getSingletonRequestQueue(this).cancelAll(new RequestFilter() {
+            @Override
+            public boolean apply(Request<?> request) {
+                // Don't be selective about which requests to cancel--just cancel everything
+                return true;
+            }
+        });
     }
 
     /** Handle a change in the search term text */
@@ -145,15 +154,7 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
         protected String doInBackground(String... searchString) {
 
             // Cancel any outstanding searches for which we don't yet have a response
-            if (requestQueue != null) {
-                requestQueue.cancelAll(new RequestFilter() {
-                    @Override
-                    public boolean apply(Request<?> request) {
-                        // Don't be selective on which requests to cancel--just cancel everything
-                        return true;
-                    }
-                });
-            }
+            removeAllRequests();
 
             try {
                 Thread.sleep(SEARCH_DELAY_MS);
@@ -194,10 +195,10 @@ public class MainActivity extends Activity implements Response.ErrorListener, Li
         int startIndex = page * PAGE_SIZE + 1;
 
         try { 
-            GoogleImageSearchRequest request = new GoogleImageSearchRequest(API_KEY, searchString, startIndex, PAGE_SIZE, this, this);
+            GoogleImageSearchRequest request = new GoogleImageSearchRequest(API_KEY, 
+                    CUSTOM_SEARCH_ENGINE_ID, searchString, startIndex, PAGE_SIZE, this, this);
             request.setShouldCache(SHOULD_CACHE);
-            requestQueue = Volley.getSingletonRequestQueue(this);
-            requestQueue.add(request);
+            Volley.getSingletonRequestQueue(this).add(request);
             lastSearchString = searchString;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
